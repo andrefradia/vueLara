@@ -19,6 +19,10 @@ Vue.component(HasError.name, HasError)
 Vue.component(AlertError.name, AlertError)
 
 
+//Notification for form error validation (Custom component)
+Vue.component('form-error', require('./components/form-error/FormError.vue').default)
+
+
 //VueRouter
 import VueRouter from 'vue-router'
 Vue.use(VueRouter)
@@ -26,7 +30,8 @@ Vue.use(VueRouter)
 let routes = [
   { path: '/dashboard', component: require('./components/Dashboard.vue').default },
   { path: '/users', component: require('./components/Users.vue').default },
-  { path: '/profile', component: require('./components/Profile.vue').default }
+  { path: '/profile', component: require('./components/Profile.vue').default },
+  { path: '/developer', component: require('./components/Developer.vue').default }
 ]
 
 const router = new VueRouter({
@@ -71,6 +76,24 @@ window.toast = Toast
 
 //Vue Object For Emit Event
 window.Fire = new Vue();
+
+
+
+//Testing Laravel Passport Purpose
+Vue.component(
+    'passport-clients',
+    require('./components/passport/Clients.vue').default
+);
+
+Vue.component(
+    'passport-authorized-clients',
+    require('./components/passport/AuthorizedClients.vue').default
+);
+
+Vue.component(
+    'passport-personal-access-tokens',
+    require('./components/passport/PersonalAccessTokens.vue').default
+);
 
 
 /**

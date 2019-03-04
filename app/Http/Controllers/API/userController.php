@@ -2,14 +2,21 @@
 
 namespace App\Http\Controllers\API;
 
+use Laravel\Passport\HasApiTokens;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 use App\User;
 
 class userController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -96,5 +103,41 @@ class userController extends Controller
         $user = User::findOrFail($id);
         $user->delete();
         return ['message' => 'user deleted!'];
+    }
+
+    public function authProfile(){        
+        return auth('api')->user();
+    }
+
+    public function updateAuthProfile(Request $request){        
+        $req = new Request($request->all());
+
+        $user = auth('api')->user();
+        $this->validate($request,[
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|string|max:255|unique:users,email,'.$user['id'],
+            'password' => 'sometimes|string|min:6',
+        ]);
+        
+        $userPhoto = public_path('/img/uploads/').$user->photo;
+        if ($request->hasFile('photo')) {
+            if (file_exists($userPhoto)) {
+                Storage::disk('uploads')->delete($user->photo);
+            }
+            $file = $request->file('photo');
+            $fileName = '/' . time() . '.' . $file->getClientOriginalExtension();            
+            Storage::disk('uploads')->put($fileName, file_get_contents($file->getRealPath()));
+            
+            $req->merge(['photo' => $fileName]);            
+        }
+
+        if (!empty($request->password)) {            
+            $req->merge(['password' => Hash::make($request->password)]);
+
+            // return ['message' => 'pass changed! '.$req->name.' '.$request->password.' '.$req->password];            
+        }
+
+        $user->update($req->all());
+        return $req->all();
     }
 }
