@@ -29370,3 +29370,8 @@ readers do not read off random characters that represent icons */
   height: 200px !important;
 }
 
+.browse-file {
+  visibility: hidden;
+  position: absolute;
+}
+

@@ -9,6 +9,10 @@ require('./bootstrap');
 
 window.Vue = require('vue');
 
+//Custom Gate JS file
+import Gate from './Gate';
+Vue.prototype.$gate = new Gate(window.type);
+
 //MomentJS
 import moment from 'moment';
 
@@ -22,6 +26,8 @@ Vue.component(AlertError.name, AlertError)
 //Notification for form error validation (Custom component)
 Vue.component('form-error', require('./components/form-error/FormError.vue').default)
 
+//Custom 404 error page
+Vue.component('error-page',require('./components/PageNotFound.vue').default)
 
 //VueRouter
 import VueRouter from 'vue-router'

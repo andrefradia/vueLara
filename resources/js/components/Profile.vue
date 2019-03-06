@@ -7,8 +7,11 @@
                 <div class="card card-widget widget-user">
                   <!-- Add the bg color to the header using any of the bg-* classes -->
                   <div class="widget-user-header text-white widget-user-header-style" style="background: url('./img/user-cover.jpg');">
-                    <h3 class="widget-user-username">Elizabeth Pierce</h3>
-                    <h5 class="widget-user-desc">Web Designer</h5>
+                    <div class="col-md-">
+                        
+                    </div>
+                    <h3 class="widget-user-username">{{form.name}}</h3>
+                    <h5 class="widget-user-desc">{{form.email}}</h5>
                   </div>
                   <div class="widget-user-image">
                     <img class="img-circle" :src="getProfilePhoto()" alt="User Avatar">
@@ -122,8 +125,14 @@
 
                           <div class="form-group">
                             <label for="email" class="col-md-12 control-label">Profile Photo</label>
-                            <div class="col-md-12">
-                              <input @change="imageSelect" type="file" name="photo" id="photo">
+                            <div class="col-md-12">                                
+                                <input @change="imageSelect" class="browse-file" type="file" name="photo" id="photo">
+                                <div class="input-group">                                
+                                    <input v-model="attach.name" type="text" class="form-control" placeholder="Choose file" readonly>
+                                    <div class="input-group-append">
+                                        <button @click="browseFile" class="btn btn-secondary" type="button">Browse&hellip;</button> 
+                                    </div>
+                                </div>
                             </div>
                           </div>
 
@@ -132,7 +141,7 @@
                             <div class="col-md-12">
                               <input v-model="form.password" type="password" class="form-control" id="password" :class="{'is-invalid': errors.password }">
                               <form-error :errors="errors.password"></form-error>
-                            </div>
+                            </div>                            
                           </div>
                           
                           <div class="form-group">
@@ -170,28 +179,46 @@
                 }),
                 fd: {},
                 attach: '',
-                errors: {},
-                errorPos:{
-                    name:false,
-                    email:false,
-                    password:false
-                },
-                isActive:true
+                errors: {},                            
             }
         },
         methods:{
+            browseFile(){
+                $('#photo').click();
+            },
             getProfilePhoto(){
                 return "/img/uploads"+this.form.photo;
             },
-            imageSelect(img){                                
-                this.attach = img.target.files[0];                
+            imageSelect(img){                
+                this.attach = img.target.files[0];
+                if (!(this.attach.type == 'image/jpg') && !(this.attach.type == 'image/png') && !(this.attach.type == 'image/jpeg')) {                    
+                    this.attach = '';
+                    Swal.fire(
+                      'Oops...',
+                      'Only accept image file with jpg/jpeg/png extension!',
+                      'error'
+                    )
+                }else{
+                    if (this.attach.size>2097152) {
+                        this.attach = '';
+                        Swal.fire(
+                          'Oops...',
+                          'Your file is larger than 2MB!',
+                          'error'
+                        )
+                    };
+                };
             },
             objcetToDataForm(){
                 let dataForm = new FormData();
                 dataForm.append('name', this.form.name);
                 dataForm.append('email', this.form.email);
-                dataForm.append('bio', this.form.bio);
-                dataForm.append('photo', this.attach);
+                if (this.form.bio) {
+                    dataForm.append('bio', this.form.bio);
+                };
+                if (this.attach) {
+                    dataForm.append('photo', this.attach);
+                };
                 if (this.form.password) {
                     dataForm.append('password', this.form.password);
                 };
@@ -201,38 +228,27 @@
                 this.fd = {};
                 this.attach = '';
             },
-            updateProfile(){                          
+            updateProfile(){
+                this.$Progress.start();
                 this.fd = this.objcetToDataForm();
                 axios.post('api/updateprofile', this.fd)
                 .then(() => {
                     this.resetFormData();
-                    
                     this.errors = {};
-                    this.resetErrorPos();
+                    Fire.$emit('loadUserData');
 
-                    Fire.$emit('loadUserData');                    
+                    toast.fire({
+                        type: 'success',
+                        title: 'Successfully updated user\'s info'
+                    });
+
+                    this.$Progress.finish();
                 })
-                .catch((e) => {                    
-                    this.errors = e.response.data.errors;
-                    this.checkErrorPos();
+                .catch((e) => {
+                    this.$Progress.fail();
+                    this.errors = e.response.data.errors;                    
                 });
-            },
-            checkErrorPos(){
-                if (this.errors.name) {
-                    this.errorPos.name = true;
-                };
-                if (this.errors.email) {
-                    this.errorPos.email = true;
-                };
-                if (this.errors.password) {
-                    this.errorPos.password = true;
-                };                
-            },
-            resetErrorPos(){
-                this.errorPos.name = false;
-                this.errorPos.email = false;
-                this.errorPos.password = false;
-            }
+            },            
         },
         mounted() {
             console.log('Component mounted.')
@@ -249,7 +265,7 @@
             Fire.$on('loadUserData',()=>{
                 axios.get('api/authprofile')
                 .then(({data})=>{
-                    this.form.fill(data);                  
+                    this.form.fill(data);
                 })
                 .catch(e => {
                     this.error.push(e);

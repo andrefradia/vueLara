@@ -13,7 +13,7 @@ use App\User;
 class userController extends Controller
 {
     public function __construct()
-    {
+    {        
         $this->middleware('auth:api');
     }
 
@@ -23,7 +23,8 @@ class userController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {
+    {        
+        $this->authorize('isAdmin');
         return User::latest()->paginate(10);
     }
 
@@ -35,6 +36,8 @@ class userController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('isAdmin');
+
         $this->validate($request,[
             'name' => 'required|string|max:255',
             'email' => 'required|email|string|max:255|unique:users',
@@ -71,6 +74,8 @@ class userController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $this->authorize('isAdmin');
+
         $user = User::findOrFail($id);
 
         $this->validate($request,[
@@ -100,6 +105,8 @@ class userController extends Controller
      */
     public function destroy($id)
     {
+        $this->authorize('isAdmin');
+        
         $user = User::findOrFail($id);
         $user->delete();
         return ['message' => 'user deleted!'];
@@ -132,9 +139,7 @@ class userController extends Controller
         }
 
         if (!empty($request->password)) {            
-            $req->merge(['password' => Hash::make($request->password)]);
-
-            // return ['message' => 'pass changed! '.$req->name.' '.$request->password.' '.$req->password];            
+            $req->merge(['password' => Hash::make($request->password)]);        
         }
 
         $user->update($req->all());

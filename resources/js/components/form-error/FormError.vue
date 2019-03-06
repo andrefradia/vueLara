@@ -1,6 +1,6 @@
 <template>   
 	<div class="help-block invalid-feedback">
-		{{errors[0]}}
+		<p v-if="errors">{{errors[0]}}</p>		
 	</div>    
 </template>
 

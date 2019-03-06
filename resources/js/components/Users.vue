@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         
-        <div class="row mt-3">
+        <div class="row mt-3" v-if="$gate.isAdmin()">
           <div class="col-md-12">
             <div class="card">
               <div class="card-header">
@@ -49,6 +49,8 @@
           </div>
         </div>
 
+        <!-- 404 error page -->
+        <error-page v-if="!$gate.isAdmin()"></error-page>
 
         <!-- Modal -->
         <div class="modal fade" id="dataModal" tabindex="-1" role="dialog" aria-labelledby="addNewTitle" aria-hidden="true">
@@ -138,11 +140,13 @@
             }
         },
 
-        methods:{            
+        methods:{
             loadUser(){
-                axios.get('api/user')
-                .then(({data}) => {this.users = data.data})
-                .catch(e => {this.error.push(e)});
+                if (this.$gate.isAdmin()) {
+                  axios.get('api/user')
+                  .then(({data}) => {this.users = data.data})
+                  .catch(e => {this.error.push(e)});                  
+                };
             },
             createModal(){
                 this.editMode = false;
@@ -157,75 +161,81 @@
                 $('#dataModal').modal('show');                
             },
             createUser(){
-                this.$Progress.start()
-                this.form.post('api/user')
-                .then(() => {
-                    this.$Progress.finish()
-                    Fire.$emit('loadUserData')
-                    $('#dataModal').modal('hide')
-                    toast.fire({
-                      type: 'success',
-                      title: 'User created successfully'
-                    })
-                })
-                .catch(e => {
-                    this.$Progress.fail()
-                    this.error.push(e)
-                });
+                if (this.$gate.isAdmin()) {                  
+                  this.$Progress.start()
+                  this.form.post('api/user')
+                  .then(() => {
+                      this.$Progress.finish()
+                      Fire.$emit('loadUserData')
+                      $('#dataModal').modal('hide')
+                      toast.fire({
+                        type: 'success',
+                        title: 'User created successfully'
+                      })
+                  })
+                  .catch(e => {
+                      this.$Progress.fail()
+                      this.error.push(e)
+                  });
+                };
             },
             editUser(){
-                this.$Progress.start()
-                this.form.put('api/user/'+this.form.id)
-                .then(() =>{
-                    Fire.$emit('loadUserData')
-                    $('#dataModal').modal('hide')
-                    this.$Progress.finish()
-                    toast.fire({
-                      type: 'success',
-                      title: 'Successfully updated user\'s info'
-                    })
-                })
-                .catch(e => {
-                    this.$Progress.fail();
-                    this.error.push(e)
-                });
+                if (this.$gate.isAdmin()) {
+                  this.$Progress.start()
+                  this.form.put('api/user/'+this.form.id)
+                  .then(() =>{
+                      Fire.$emit('loadUserData')
+                      $('#dataModal').modal('hide')
+                      this.$Progress.finish()
+                      toast.fire({
+                        type: 'success',
+                        title: 'Successfully updated user\'s info'
+                      })
+                  })
+                  .catch(e => {
+                      this.$Progress.fail();
+                      this.error.push(e)
+                  });
+                };
             },
             deleteUser(id){
-                Swal.fire({
-                  title: 'Are you sure?',
-                  text: "You won't be able to revert this!",
-                  type: 'warning',
-                  showCancelButton: true,
-                  confirmButtonColor: '#3085d6',
-                  cancelButtonColor: '#d33',
-                  confirmButtonText: 'Yes, delete it!'
-                }).then((result) => {
-                    if(result.value){
+                if (this.$gate.isAdmin()) {
+                  Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    type: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, delete it!'
+                  }).then((result) => {
+                      if(result.value){
 
-                        this.$Progress.start();
-                        axios.delete('api/user/'+id)
-                        .then(() => {
-                            Fire.$emit('loadUserData')
-                            this.$Progress.finish();
+                          this.$Progress.start();
+                          axios.delete('api/user/'+id)
+                          .then(() => {
+                              Fire.$emit('loadUserData')
+                              this.$Progress.finish();
 
-                            Swal.fire(
-                              'Deleted!',
-                              'Your file has been deleted.',
-                              'success'
-                            )
-                        })
-                        .catch(e => {
-                            this.$Progress.fail();
-                            this.error.push(e)
+                              Swal.fire(
+                                'Deleted!',
+                                'Your file has been deleted.',
+                                'success'
+                              )
+                          })
+                          .catch(e => {
+                              this.$Progress.fail();
+                              this.error.push(e)
 
-                            Swal.fire(
-                              'Oops...',
-                              'Something went wrong!',
-                              'error'
-                            )
-                        });
-                    }
-                })
+                              Swal.fire(
+                                'Oops...',
+                                'Something went wrong!',
+                                'error'
+                              )
+                          });
+                      }
+                  })
+                };
             }
         },
 
