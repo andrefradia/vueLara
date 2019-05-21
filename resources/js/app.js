@@ -9,6 +9,9 @@ require('./bootstrap');
 
 window.Vue = require('vue');
 
+//lodash
+import {debounce} from 'lodash';
+
 //Custom Gate JS file
 import Gate from './Gate';
 Vue.prototype.$gate = new Gate(window.type);
@@ -22,12 +25,17 @@ window.Form = Form;
 Vue.component(HasError.name, HasError)
 Vue.component(AlertError.name, AlertError)
 
+//Laravel VueJS Pagination
+Vue.component('pagination', require('vue-pagination-2'));
 
 //Notification for form error validation (Custom component)
 Vue.component('form-error', require('./components/form-error/FormError.vue').default)
 
 //Custom 404 error page
 Vue.component('error-page',require('./components/PageNotFound.vue').default)
+
+//Invoide page example
+Vue.component('invoice-page',require('./components/Invoice.vue').default)
 
 //VueRouter
 import VueRouter from 'vue-router'
@@ -37,7 +45,8 @@ let routes = [
   { path: '/dashboard', component: require('./components/Dashboard.vue').default },
   { path: '/users', component: require('./components/Users.vue').default },
   { path: '/profile', component: require('./components/Profile.vue').default },
-  { path: '/developer', component: require('./components/Developer.vue').default }
+  { path: '/developer', component: require('./components/Developer.vue').default },
+  { path: '*', component: require('./components/PageNotFound.vue').default }
 ]
 
 const router = new VueRouter({
@@ -77,7 +86,6 @@ const Toast = Swal.mixin({
 });
 
 window.toast = Toast
-
 
 
 //Vue Object For Emit Event

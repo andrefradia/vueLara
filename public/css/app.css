@@ -29375,3 +29375,31 @@ readers do not read off random characters that represent icons */
   position: absolute;
 }
 
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #invoice,
+  #invoice * {
+    visibility: visible;
+  }
+
+  #invoice {
+    position: fixed;
+  }
+
+  .invoice {
+    background-position: center center;
+    background-repeat: no-repeat;
+  }
+
+  .table-responsive table {
+    background-color: transparent !important;
+  }
+}
+
+@page {
+  margin: 0;
+}
+

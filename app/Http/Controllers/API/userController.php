@@ -23,9 +23,9 @@ class userController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {        
+    {
         $this->authorize('isAdmin');
-        return User::latest()->paginate(10);
+        return User::latest()->paginate(5);
     }
 
     /**
@@ -144,5 +144,17 @@ class userController extends Controller
 
         $user->update($req->all());
         return $req->all();
+    }
+
+    public function searchUser($wildcard){
+        $this->authorize('isAdmin');
+       
+        $query = $wildcard;
+        $user = User::where('name','like',"%$query%")
+                    ->orWhere('email','like',"%$query%")
+                    ->orWhere('bio','like',"%$query%")
+                    ->latest()
+                    ->paginate(5);
+        return $user;            
     }
 }

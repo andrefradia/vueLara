@@ -5,43 +5,56 @@
           <div class="col-md-12">
             <div class="card">
               <div class="card-header">
-                <h3 class="card-title">Users Table</h3>
                 
-                <div class="card-tools">
-                    <button class="btn btn-success" @click="createModal">
-                        Add New 
-                        <i class="fas fa-user-plus fa-fw"></i>
+                <div class="col-md-4 col-6 input-group">
+                  <input v-model="search" class="form-control" type="search" placeholder="Search">
+                  <div class="input-group-append">
+                    <button class="btn btn-secondary" disabled>
+                      <i class="fa fa-search"></i>
                     </button>
+                  </div>
+                </div>
+
+                <div class="card-tools">                                    
+                  <button class="btn btn-success" @click="createModal">
+                      Add New 
+                      <i class="fas fa-user-plus fa-fw"></i>
+                  </button>
                 </div>                
               </div>
               <!-- /.card-header -->
               <div class="card-body table-responsive p-0">
                 <table class="table table-hover">
-                  <tbody><tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Type</th>
-                    <th>Registered At</th>
-                    <th>Modify</th>
-                  </tr>
-                  <tr v-for="user in users" :key="user.id">
-                    <td>{{user.id}}</td>
-                    <td>{{user.name}}</td>
-                    <td>{{user.email}}</td>
-                    <td>{{user.type | upText}}</td>
-                    <td>{{user.created_at | toDate}}</td>                    
-                    <td>
-                        <a href="#" @click="updateModal(user)">
-                            <i class="fa fa-edit blue"></i>
-                        </a>
-                        /
-                        <a href="#" @click="deleteUser(user.id)">
-                            <i class="fa fa-trash red"></i>
-                        </a>
-                    </td>
-                  </tr>                  
-                </tbody></table>
+                  <tbody>
+                    <tr>
+                      <th>ID</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Type</th>
+                      <th>Registered At</th>
+                      <th>Modify</th>
+                    </tr>
+                    <tr v-for="user in users.data" :key="user.id">
+                      <td>{{user.id}}</td>
+                      <td>{{user.name}}</td>
+                      <td>{{user.email}}</td>
+                      <td>{{user.type | upText}}</td>
+                      <td>{{user.created_at | toDate}}</td>                    
+                      <td>
+                          <a href="#" @click="updateModal(user)">
+                              <i class="fa fa-edit blue"></i>
+                          </a>
+                          /
+                          <a href="#" @click="deleteUser(user.id)">
+                              <i class="fa fa-trash red"></i>
+                          </a>
+                      </td>
+                    </tr>                  
+                  </tbody>
+                </table>                
+              </div>
+              <div class="card-footer">              
+                <pagination :records="totalRec" v-model="page" :per-page="5" @paginate="getResults"></pagination>
               </div>
               <!-- /.card-body -->
             </div>
@@ -124,10 +137,16 @@
 </template>
 
 <script>
-    export default {
+import _ from 'lodash';
+
+    export default {        
         data(){
             return{
+                page: 1,
+                totalRec: 0,
+                pageUrl: '',
                 editMode: false,
+                search: '',
                 users:{},
                 form: new Form({
                     name: '',
@@ -138,13 +157,31 @@
                     photo: ''
                 })
             }
-        },
-
+        },        
         methods:{
+            paginationURL(){
+                if(!this.search){
+                  this.pageUrl = 'api/user';
+                }else{
+                  this.pageUrl = 'api/searchuser/'+this.search;
+                }
+            },
+            getResults(page) {
+                this.paginationURL();
+
+                axios.get(this.pageUrl+'?page='+page)
+                .then(({data}) => {
+                    this.users = data;
+                });
+            },            
             loadUser(){
                 if (this.$gate.isAdmin()) {
                   axios.get('api/user')
-                  .then(({data}) => {this.users = data.data})
+                  .then(({data}) => {
+                    this.users = data;
+                    this.totalRec = this.users.total;
+                    console.log(this.users);
+                  })
                   .catch(e => {this.error.push(e)});                  
                 };
             },
@@ -236,13 +273,31 @@
                       }
                   })
                 };
-            }
+            },            
+            searchUser: _.debounce(function(){
+              if (this.search) {
+                axios.get('api/searchuser/'+this.search)
+                .then(({data}) => {
+                  this.users = data;
+                  this.totalRec = this.users.total;
+                  this.page = 1;
+                })
+                .catch();
+              }else{
+                this.loadUser();
+              };
+            },500),
         },
-
+        watch:{
+          search(){            
+            this.searchUser();            
+            console.log(this.search+" "+this.search.length+" "+_.isEmpty(this.search));          
+          }
+        },
         created() {            
             this.loadUser();
             Fire.$on('loadUserData',()=>{
-                this.loadUser();
+                this.loadUser();                
             })
         }
     }

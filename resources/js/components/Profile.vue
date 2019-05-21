@@ -54,12 +54,14 @@
                     <ul class="nav nav-pills">
                       <li class="nav-item"><a class="nav-link active show" href="#activity" data-toggle="tab">Activity</a></li>                      
                       <li class="nav-item"><a class="nav-link" href="#settings" data-toggle="tab">Settings</a></li>
+                      <li class="nav-item"><a class="nav-link" href="#invoice-tab" data-toggle="tab">Invoice</a></li>
+
                     </ul>
                   </div><!-- /.card-header -->
                   
                   <div class="card-body">
                     <div class="tab-content">
-                      <!-- Activity Pane -->
+                      <!-- Activity Pane -->                      
                       <div class="tab-pane active show" id="activity">
                         <!-- Post -->
                         <div class="post">
@@ -152,6 +154,13 @@
                         </form>
                       </div>
                       <!-- /.Setting Pane -->
+                      
+                      <!-- Invoice Page -->
+                      <div class="tab-pane" id="invoice-tab">
+                        <invoice-page></invoice-page>
+                      </div>
+                      <!-- /.Invoice Page -->
+
                     </div>
                     <!-- /.tab-content -->
                   </div>

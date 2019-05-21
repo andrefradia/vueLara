@@ -179,7 +179,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
 @endauth
 
 <!-- REQUIRED SCRIPTS -->
-
 <!-- admin-lte 3 js file -->
 <script src="/js/app.js"></script>
 
