@@ -124,6 +124,15 @@ scratch. This page gets rid of all links and provides the needed markup only.
             </router-link>
           </li>
 
+          <li class="nav-item">
+            <a href="/userExport" class="nav-link">
+              <i class="nav-icon fas fa-user cyan"></i>
+                <p>
+                  Export
+                </p>
+            </a>
+          </li>
+
           <li class="nav-item">            
             <a class="nav-link" href="{{ route('logout') }}"
               onclick="event.preventDefault();
